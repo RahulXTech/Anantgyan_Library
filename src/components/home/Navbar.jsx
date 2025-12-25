@@ -1,85 +1,90 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const location = useLocation();
 
   const closeMenu = () => setOpen(false);
 
+  const navItems = [
+    { path: "/", label: "Home" },
+    { path: "/about", label: "About" },
+    { path: "/facilities", label: "Facilities" },
+    { path: "/contact", label: "Contact" },
+    { path: "/login", label: "Login" },
+  ];
+
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        
-        {/* Logo / Brand */}
-        <Link to="/" className="text-xl font-bold text-blue-600">
-          Anantgyan Library
-        </Link>
+    <nav className="sticky top-0 z-50">
+      <div className="backdrop-blur-xl bg-white/80 shadow-md border-b border-white/20">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
 
-        {/* Desktop Menu */}
-        <ul className="hidden md:flex space-x-8 font-medium text-gray-700">
-          <li>
-            <Link to="/" className="hover:text-blue-600">Home</Link>
-          </li>
-          <li>
-            <Link to="/gallery" className="hover:text-blue-600">Gallery</Link>
-          </li>
-          <li>
-            <Link to="/halls" className="hover:text-blue-600">Halls</Link>
-          </li>
-          <li>
-            <Link to="/ebooks" className="hover:text-blue-600">E-Book</Link>
-          </li>
-          <li>
-            <Link to="/facilities" className="hover:text-blue-600">Facilities</Link>
-          </li>
-          <li>
-            <Link to="/contact" className="hover:text-blue-600">Contact</Link>
-          </li>
+          {/* Logo */}
+          <Link
+            to="/"
+            className="text-2xl font-extrabold text-blue-700 tracking-wide"
+          >
+            Anantgyan <span className="text-blue-500">Library</span>
+          </Link>
 
-          {/* More Dropdown */}
-          <li className="relative group cursor-pointer">
-            <span className="hover:text-blue-600">More ▾</span>
-            <ul className="absolute hidden group-hover:block bg-white shadow-md rounded-md mt-2 w-44">
-              <li>
-                <Link to="/rules" className="block px-4 py-2 hover:bg-gray-100">
-                  Rules
+          {/* Desktop Menu */}
+          <ul className="hidden md:flex items-center gap-8 text-gray-700 font-medium">
+            {navItems.map((item) => (
+              <li key={item.path}>
+                <Link
+                  to={item.path}
+                  className={`relative transition ${
+                    location.pathname === item.path
+                      ? "text-blue-600"
+                      : "hover:text-blue-600"
+                  }`}
+                >
+                  {item.label}
+
+                  {/* Active Underline */}
+                  {location.pathname === item.path && (
+                    <span className="absolute left-0 -bottom-1 w-full h-[2px] bg-blue-600 rounded-full"></span>
+                  )}
                 </Link>
               </li>
-              <li>
-                <Link to="/timings" className="block px-4 py-2 hover:bg-gray-100">
-                  Timings
-                </Link>
-              </li>
-              <li>
-                <Link to="/success-stories" className="block px-4 py-2 hover:bg-gray-100">
-                  Success Stories
-                </Link>
-              </li>
-            </ul>
-          </li>
-        </ul>
+            ))}
+          </ul>
 
-        {/* Mobile Menu Button */}
-        <button
-          className="md:hidden text-2xl"
-          onClick={() => setOpen(!open)}
-        >
-          ☰
-        </button>
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden text-3xl text-gray-800"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? "✖" : "☰"}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
       {open && (
-        <div className="md:hidden bg-white shadow-md px-6 py-4 space-y-4 font-medium">
-          <Link to="/" onClick={closeMenu}>Home</Link>
-          <Link to="/gallery" onClick={closeMenu}>Gallery</Link>
-          <Link to="/halls" onClick={closeMenu}>Halls</Link>
-          <Link to="/ebooks" onClick={closeMenu}>E-Book</Link>
-          <Link to="/facilities" onClick={closeMenu}>Facilities</Link>
-          <Link to="/contact" onClick={closeMenu}>Contact</Link>
-          <Link to="/rules" onClick={closeMenu}>Rules</Link>
-          <Link to="/timings" onClick={closeMenu}>Timings</Link>
-          <Link to="/success-stories" onClick={closeMenu}>Success Stories</Link>
+        <div className="md:hidden bg-white shadow-xl border-t border-gray-200 animate__animated animate__fadeInDown px-6 py-5 space-y-4 font-medium">
+          <Link to="/" onClick={closeMenu} className="block">
+            Home
+          </Link>
+          <Link to="/about" onClick={closeMenu} className="block">
+            About
+          </Link>
+          <Link to="/facilities" onClick={closeMenu} className="block">
+            Facilities
+          </Link>
+          <Link to="/halls" onClick={closeMenu} className="block">
+            Halls
+          </Link>
+          <Link to="/rules" onClick={closeMenu} className="block">
+            Rules
+          </Link>
+          <Link to="/contact" onClick={closeMenu} className="block">
+            Contact
+          </Link>
+          <Link to="/login" onClick={closeMenu} className="block">
+            Login
+          </Link>
         </div>
       )}
     </nav>

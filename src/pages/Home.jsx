@@ -9,7 +9,6 @@ import Navbar from "../components/home/Navbar";
 import Gallery from "../components/home/Gallery";
 import Footer from "../components/home/Footer";
 
-
 export default function Home() {
   return (
     <main className="font-sans bg-gray-50 text-gray-800">
