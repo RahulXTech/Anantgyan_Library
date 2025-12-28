@@ -1,12 +1,29 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    const email = e.target.email.value;
+    const password = e.target.password.value;
+
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (user && email === user.email && password === user.password) {
+      localStorage.setItem("admin", true);
+      navigate("/admin");
+    } else {
+      alert("Invalid Email or Password");
+    }
+  };
 
   return (
     <section className="min-h-screen relative flex items-center justify-center overflow-hidden">
-      
+
       {/* Background Image */}
       <div
         className="absolute inset-0 bg-cover bg-center"
@@ -22,7 +39,6 @@ export default function Login() {
       {/* Login Card */}
       <div className="relative bg-white/10 backdrop-blur-xl border border-white/30 shadow-2xl rounded-2xl w-[95%] max-w-md px-8 py-10 text-white">
 
-        {/* Title */}
         <h2 className="text-3xl font-bold text-center">
           Welcome Back
         </h2>
@@ -30,13 +46,13 @@ export default function Login() {
           Login to continue your learning journey
         </p>
 
-        {/* Form */}
-        <form className="mt-8 space-y-6">
+        <form onSubmit={handleLogin} className="mt-8 space-y-6">
 
           {/* Email */}
           <div>
             <label className="text-sm text-gray-300">Email</label>
             <input
+              name="email"
               type="email"
               placeholder="Enter your email"
               className="w-full mt-2 px-4 py-3 rounded-lg bg-white/10 text-white border border-white/30 placeholder-gray-300 
@@ -50,6 +66,7 @@ export default function Login() {
 
             <div className="relative mt-2">
               <input
+                name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 className="w-full px-4 py-3 rounded-lg bg-white/10 text-white border border-white/30 placeholder-gray-300
@@ -64,19 +81,6 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Options */}
-          <div className="flex justify-between items-center text-sm text-gray-300">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" className="accent-blue-500" />
-              Remember Me
-            </label>
-
-            <a href="#" className="hover:text-blue-400">
-              Forgot Password?
-            </a>
-          </div>
-
-          {/* Button */}
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-3 rounded-lg shadow-lg hover:scale-[1.02]"
@@ -85,14 +89,11 @@ export default function Login() {
           </button>
         </form>
 
-        {/* Bottom Text */}
         <p className="text-center text-gray-300 mt-6 text-sm">
           Don’t have an account?{" "}
-          <span className="text-blue-400 cursor-pointer hover:underline">
-            <Link to="/register">
-                Register Now
-            </Link>
-          </span>
+          <Link to="/register" className="text-blue-400 hover:underline">
+            Register Now
+          </Link>
         </p>
       </div>
     </section>
