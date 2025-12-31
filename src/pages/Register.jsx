@@ -13,18 +13,39 @@ export default function Register() {
     confirm: "",
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (form.password !== form.confirm) {
-      alert("Password not matched");
-      return;
+  if (form.password !== form.confirm) {
+    alert("Passwords do not match!");
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:5000/api/admin/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json", 
+    },
+      body: JSON.stringify({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("Registration successful! Please login.");
+      navigate("/login");
+    } else {
+      alert(data.message || "Registration failed!");
     }
-
-    localStorage.setItem("user", JSON.stringify(form));
-    alert("Registration Successful");
-    navigate("/login");
-  };
+  } catch (error) {
+    alert("An error occurred. Please try again.");
+  }
+ };
 
   return (
     <section className="min-h-screen relative flex items-center justify-center overflow-hidden">

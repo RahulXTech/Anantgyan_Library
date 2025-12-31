@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const Students = () => {
   const [search, setSearch] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
+
   const [form, setForm] = useState({
+    _id: null,
     name: "",
     room: "",
     seat: "",
@@ -12,157 +15,336 @@ const Students = () => {
     email: "",
   });
 
-  const [data, setData] = useState([
-    {
-      name: "Ankit Kumar",
-      room: "R-101",
-      seat: "A-12",
-      expiry: "31 Dec 2025",
-      mobile: "9876543210",
-      email: "ankit@gmail.com",
-    },
-    {
-      name: "Rahul Sharma",
-      room: "R-102",
-      seat: "B-07",
-      expiry: "15 Jan 2026",
-      mobile: "9123456780",
-      email: "rahul@gmail.com",
-    },
-    {
-      name: "Sudhir Sharma",
-      room: "R-105",
-      seat: "C-08",
-      expiry: "15 Mar 2026",
-      mobile: "9523456780",
-      email: "sudhir@gmail.com",
-    },
-  ]);
+  const [data, setData] = useState([]);
 
-  const filtered = data.filter((s) =>
-    Object.values(s).some((v) =>
-      v.toLowerCase().includes(search.toLowerCase())
-    )
-  );
+  // ✅ FIX-2 & FIX-3 states
+  const [rooms, setRooms] = useState([]);
+  const [availableSeats, setAvailableSeats] = useState([]);
 
-  const handleDelete = (index) => {
-    if (window.confirm("Delete student?")) {
-      const updated = [...data];
-      updated.splice(index, 1);
-      setData(updated);
+  // ================= INITIAL LOAD =================
+  useEffect(() => {
+    fetchStudents();
+    fetchRooms();
+  }, []);
+
+  // ================= FETCH STUDENTS =================
+  const fetchStudents = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/students", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const students = await res.json();
+
+      // 🔥 BACKEND → FRONTEND mapping (NAME FIX)
+      const formatted = students.map((s) => ({
+        _id: s._id,
+        name: s.name || "",
+        room: s.room || "",
+        seat: s.seatNumber || "",
+        expiry: s.expiry || "",
+        mobile: s.mobile || "",
+        email: s.email || "",
+      }));
+
+      setData(formatted);
+    } catch (err) {
+      console.error(err);
     }
   };
 
+  // ================= FETCH ROOMS =================
+  const fetchRooms = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/rooms");
+      const data = await res.json();
+      setRooms(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // ================= FIX-3: ROOM CHANGE → LOAD SEATS =================
+  useEffect(() => {
+    if (!form.room) {
+      setAvailableSeats([]);
+      return;
+    }
+
+    fetch(`http://localhost:5000/api/seats/room/${form.room}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((seats) => {
+        // 🔹 केवल available seats
+        const freeSeats = seats.filter((s) => !s.isBooked);
+        setAvailableSeats(freeSeats);
+      })
+      .catch(console.error);
+  }, [form.room]);
+
+  // ================= SEARCH =================
+  const filtered = data.filter((s) =>
+    Object.values(s).some((v) =>
+      v?.toString().toLowerCase().includes(search.toLowerCase())
+    )
+  );
+
+  // ================= DELETE =================
+  const handleDelete = async (index) => {
+    if (!window.confirm("Delete student?")) return;
+
+    try {
+      const student = data[index];
+
+      await fetch(`http://localhost:5000/api/students/${student._id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const updated = [...data];
+      updated.splice(index, 1);
+      setData(updated);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // ================= EDIT =================
   const handleEdit = (student, index) => {
     setEditIndex(index);
-    setForm(student);
+    setForm({ ...student });
   };
 
-  const handleUpdate = () => {
-    const updated = [...data];
-    updated[editIndex] = form;
-    setData(updated);
-    setEditIndex(null);
-  };
+  // ================= CREATE / UPDATE =================
+  const handleUpdate = async () => {
+    try {
+      const payload = {
+        name: form.name,
+        email: form.email,
+        room: form.room,
+        seatNumber: form.seat,
+        expiry: form.expiry,
+        mobile: form.mobile,
+      };
 
-  return (
-    <>
-      {/* Search + Create */}
-      <div className="flex items-center justify-between mb-4">
-        <input
-          type="text"
-          placeholder="Search students..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border rounded-lg px-3 py-2 w-full max-w-sm"
-        />
+      if (!form._id) {
+        // ➕ CREATE STUDENT
+        const res = await fetch("http://localhost:5000/api/students", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(payload),
+        });
 
-        <button
-          onClick={() =>
-            handleEdit(
-              {
-                name: "",
-                room: "",
-                seat: "",
-                expiry: "",
-                mobile: "",
-                email: "",
-              },
-              data.length
-            )
+        const saved = await res.json();
+
+        // 🔹 table update
+        setData([
+          ...data,
+          {
+            _id: saved._id,
+            ...form,
+          },
+        ]);
+      } else {
+        // ✏️ UPDATE STUDENT
+        const res = await fetch(
+          `http://localhost:5000/api/students/${form._id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify(payload),
           }
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-        >
-          ➕ Create Student
-        </button>
-      </div>
+        );
 
-      {/* Table */}
-      <div className="bg-white rounded-xl shadow overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-3 text-left">Name</th>
-              <th className="p-3 text-left">Room</th>
-              <th className="p-3 text-left">Seat</th>
-              <th className="p-3 text-left">Expiry</th>
-              <th className="p-3 text-left">Mobile</th>
-              <th className="p-3 text-left">Email</th>
-              <th className="p-3 text-left">Actions</th>
-            </tr>
-          </thead>
+        const updated = await res.json();
+        const newData = [...data];
+        newData[editIndex] = {
+          _id: updated._id,
+          name: updated.name,
+          room: updated.room,
+          seat: updated.seatNumber,
+          expiry: updated.expiry,
+          mobile: updated.mobile,
+          email: updated.email,
+        };
+        setData(newData);
+      }
 
-          <tbody>
-            {filtered.map((s, i) => (
-              <tr key={i} className="border-t">
-                <td className="p-3">{s.name}</td>
-                <td className="p-3">{s.room}</td>
-                <td className="p-3">{s.seat}</td>
-                <td className="p-3">{s.expiry}</td>
-                <td className="p-3">{s.mobile}</td>
-                <td className="p-3">{s.email}</td>
-                <td className="p-3 space-x-3">
-                  <button
-                    className="text-blue-600"
-                    onClick={() => handleEdit(s, data.indexOf(s))}
-                  >
-                    Edit
-                  </button>
+      setEditIndex(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-                  <button
-                    className="text-red-600"
-                    onClick={() => handleDelete(data.indexOf(s))}
-                  >
-                    Delete
-                  </button>
-                </td>
+  // ================= UI =================
+  return (
+    <div className="min-h-screen flex bg-gray-100">
+      <div className="flex-1 flex flex-col">
+        <header className="bg-white shadow px-4 py-3 flex items-center gap-3">
+          <button
+            className="md:hidden text-xl"
+            onClick={() => setSidebarOpen(true)}
+          >
+            ☰
+          </button>
+
+          <input
+            type="text"
+            placeholder="Search students..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border rounded-lg px-3 py-2 w-full max-w-sm"
+          />
+        </header>
+
+        <div className="p-4">
+          <button
+            onClick={() =>
+              handleEdit(
+                {
+                  _id: null,
+                  name: "",
+                  room: "",
+                  seat: "",
+                  expiry: "",
+                  mobile: "",
+                  email: "",
+                },
+                data.length
+              )
+            }
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+          >
+            ➕ Create Student
+          </button>
+        </div>
+
+        <div className="px-4 pb-6 overflow-x-auto">
+          <table className="w-full bg-white rounded-xl shadow text-sm">
+            <thead className="bg-gray-100">
+              <tr>
+                {[
+                  "Name",
+                  "Room",
+                  "Seat",
+                  "Expiry",
+                  "Mobile",
+                  "Email",
+                  "Actions",
+                ].map((h) => (
+                  <th key={h} className="p-3 text-left">
+                    {h}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map((s, i) => (
+                <tr key={s._id} className="border-t">
+                  <td className="p-3">{s.name}</td>
+                  <td className="p-3">{s.room}</td>
+                  <td className="p-3">{s.seat}</td>
+                  <td className="p-3">{s.expiry}</td>
+                  <td className="p-3">{s.mobile}</td>
+                  <td className="p-3">{s.email}</td>
+                  <td className="p-3 space-x-3">
+                    <button
+                      className="text-blue-600"
+                      onClick={() => handleEdit(s, i)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="text-red-600"
+                      onClick={() => handleDelete(i)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Modal */}
+      {/* ================= MODAL ================= */}
       {editIndex !== null && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl w-full max-w-md space-y-3">
-            {Object.keys(form).map((k) => (
-              <input
-                key={k}
-                placeholder={k}
-                value={form[k]}
-                onChange={(e) =>
-                  setForm({ ...form, [k]: e.target.value })
-                }
-                className="border p-2 w-full rounded"
-              />
-            ))}
+            <input
+              placeholder="Name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="border p-2 w-full rounded"
+            />
+
+            {/* ROOM DROPDOWN */}
+            <select
+              value={form.room}
+              onChange={
+                (e) => setForm({ ...form, room: e.target.value, seat: "" }) // ✅ room._id store hoga
+              }
+              className="border p-2 w-full rounded"
+            >
+              <option value="">Select Room</option>
+              {rooms.map((r) => (
+                <option key={r._id} value={r._id}>
+                  {" "}
+                  {/* // ✅ yaha _id use karo */}
+                  {r.hall} - {r.roomName}
+                </option>
+              ))}
+            </select>
+
+            {/* SEAT DROPDOWN */}
+            <select
+              value={form.seat}
+              onChange={(e) => setForm({ ...form, seat: e.target.value })}
+              className="border p-2 w-full rounded"
+            >
+              <option value="">Select Seat</option>
+              {availableSeats.map((s) => (
+                <option key={s._id} value={s.seatNumber}>
+                  Seat {s.seatNumber}
+                </option>
+              ))}
+            </select>
+
+            <input
+              placeholder="Expiry"
+              value={form.expiry}
+              onChange={(e) => setForm({ ...form, expiry: e.target.value })}
+              className="border p-2 w-full rounded"
+            />
+            <input
+              placeholder="Mobile"
+              value={form.mobile}
+              onChange={(e) => setForm({ ...form, mobile: e.target.value })}
+              className="border p-2 w-full rounded"
+            />
+            <input
+              placeholder="Email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className="border p-2 w-full rounded"
+            />
 
             <div className="flex justify-end gap-3 pt-3">
-              <button onClick={() => setEditIndex(null)}>
-                Cancel
-              </button>
-
+              <button onClick={() => setEditIndex(null)}>Cancel</button>
               <button
                 onClick={handleUpdate}
                 className="bg-blue-600 text-white px-4 py-2 rounded"
@@ -173,7 +355,7 @@ const Students = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

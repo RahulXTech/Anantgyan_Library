@@ -4,20 +4,39 @@ import { Link, useNavigate } from "react-router-dom";
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    const email = e.target.email.value;
-    const password = e.target.password.value;
+    const form = {
+      email: e.target.email.value,
+      password: e.target.password.value,
+    };
+    try {
+      const res = await fetch("http://localhost:5000/api/admin/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+      
+      const data = await res.json();
 
-    const user = JSON.parse(localStorage.getItem("user"));
-
-    if (user && email === user.email && password === user.password) {
-      localStorage.setItem("admin", true);
-      navigate("/admin");
-    } else {
-      alert("Invalid Email or Password");
+      if (res.ok) {
+        alert("Login successful!");
+        // Store token or user info as needed
+        localStorage.setItem("token", data.token);
+        navigate("/admin");
+      } else {
+        alert(data.message || "Login failed!");
+      }
+  } catch (error) {
+      alert("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
