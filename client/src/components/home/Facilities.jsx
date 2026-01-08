@@ -1,81 +1,76 @@
 const facilities = [
   {
-    title: "AC / Non-AC Study Rooms",
-    desc: "Well-ventilated, calm, and comfortable study halls for long focused hours.",
+    title: "Silent Study Zone",
+    desc: "Noise-free environment for deep focus.",
+    img: "https://images.unsplash.com/photo-1516979187457-637abb4f9353",
+  },
+  {
+    title: "Comfortable Seating",
+    desc: "Ergonomic chairs and spacious desks.",
+    img: "https://images.unsplash.com/photo-1519710164239-da123dc03ef4",
+  },
+  {
+    title: "Proper Lighting",
+    desc: "Eye-friendly lighting for long hours.",
     img: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
   },
   {
-    title: "Individual Study Desks",
-    desc: "Dedicated desks designed for serious and distraction-free preparation.",
-    img: "https://images.unsplash.com/photo-1584697964154-0d5c0b2e69b1",
-  },
-  {
-    title: "CCTV Security",
-    desc: "24×7 CCTV surveillance ensuring safety and discipline inside the library.",
-    img: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc",
-  },
-  {
-    title: "Clean Drinking Water",
-    desc: "Purified drinking water available for all students throughout the day.",
-    img: "https://images.unsplash.com/photo-1558640479-8237e2a07f5c",
-  },
-  {
-    title: "Washroom Facilities",
-    desc: "Clean and hygienic washrooms maintained regularly for students.",
-    img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a",
-  },
-  {
-    title: "eBook & Digital Resources",
-    desc: "Access to useful eBooks, PDFs, and digital study materials for exams.",
-    img: "https://images.unsplash.com/photo-1512820790803-83ca734da794",
+    title: "Clean & Hygienic",
+    desc: "Well-maintained and sanitized space.",
+    img: "https://images.unsplash.com/photo-1491841550275-ad7854e35ca6",
   },
 ];
 
+
 export default function Facilities() {
   return (
-    <section className="bg-gray-100 py-20 px-6">
-      <div className="max-w-6xl mx-auto">
+   <section className="py-14 bg-white px-6">
+  <div className="max-w-7xl mx-auto">
 
-        {/* Section Heading */}
-        <div className="text-center mb-14">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-            Library Facilities
-          </h2>
-          <p className="mt-4 max-w-3xl mx-auto text-gray-600">
-            Everything you need for a disciplined, comfortable, and productive study experience.
-          </p>
-        </div>
-
-        {/* Facility Cards */}
-        <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3">
-          {facilities.map((item, i) => (
-            <div
-              key={i}
-              className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden group"
-            >
-              {/* Image */}
-              <div className="h-48 overflow-hidden">
-                <img
-                  src={item.img}
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
-                />
-              </div>
-
-              {/* Content */}
-              <div className="p-6 text-center">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {item.title}
-                </h3>
-                <p className="mt-3 text-sm text-gray-600">
-                  {item.desc}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-
+    {/* Header */}
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-10">
+      <div>
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+          Library Facilities
+        </h2>
+        <p className="mt-2 text-gray-600 text-sm max-w-xl">
+          Carefully designed facilities to support long, focused study sessions.
+        </p>
       </div>
-    </section>
+    </div>
+
+    {/* Facilities Grid */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {facilities.map((item, i) => (
+        <div
+          key={i}
+          className="group flex items-center gap-4 p-4 rounded-xl border border-gray-100
+                     bg-gray-50 hover:bg-white hover:shadow-md transition-all duration-300"
+        >
+          {/* Image */}
+          <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0">
+            <img
+              src={item.img}
+              alt={item.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition"
+            />
+          </div>
+
+          {/* Content */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">
+              {item.title}
+            </h3>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              {item.desc}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+
+  </div>
+</section>
+
   );
 }

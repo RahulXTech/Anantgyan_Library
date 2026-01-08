@@ -1,83 +1,94 @@
 const testimonials = [
   {
-    name: "Rakesh Verma",
-    exam: "MPPSC Aspirant",
+    name: "Aman Sharma",
+    exam: "UPSC Aspirant",
     feedback:
-      "Anantgyan Library helped me stay consistent and focused. The silent environment and long study hours made a huge difference.",
+      "The calm and disciplined environment helped me maintain long, focused study hours every day.",
     rating: 5,
+    image: "https://randomuser.me/api/portraits/men/32.jpg",
   },
   {
-    name: "Pooja Sharma",
-    exam: "SSC CGL Aspirant",
+    name: "Neha Verma",
+    exam: "SSC Student",
     feedback:
-      "Best library in Bhopal for serious students. Clean desks, disciplined atmosphere, and supportive management.",
-    rating: 5,
-  },
-  {
-    name: "Ankit Jain",
-    exam: "Banking Aspirant",
-    feedback:
-      "Peaceful environment with uninterrupted power and WiFi. Highly recommended for competitive exam preparation.",
+      "Very peaceful library with comfortable seating. Perfect for serious preparation.",
     rating: 4,
+    image: "https://randomuser.me/api/portraits/women/44.jpg",
+  },
+  {
+    name: "Rahul Singh",
+    exam: "College Student",
+    feedback:
+      "Clean, quiet, and disciplined atmosphere. It really improves productivity.",
+    rating: 5,
+    image: "https://randomuser.me/api/portraits/men/65.jpg",
   },
 ];
 
+
+
 export default function Testimonials() {
   return (
-    <section className="bg-gray-50 py-20 px-6">
-      <div className="max-w-6xl mx-auto">
+   <section className="py-14 bg-white px-6">
+  <div className="max-w-7xl mx-auto">
 
-        {/* Heading */}
-        <div className="text-center mb-14">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-            What Students Say
-          </h2>
-          <p className="mt-4 max-w-2xl mx-auto text-gray-600">
-            Honest feedback from students who experienced focused and disciplined study at Anantgyan Library.
+    {/* Header */}
+    <div className="mb-10 max-w-2xl">
+      <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+        Student Testimonials
+      </h2>
+      <p className="mt-2 text-sm text-gray-600">
+        Honest feedback from students who experienced focused and disciplined study.
+      </p>
+    </div>
+
+    {/* Testimonials */}
+    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {testimonials.map((item, index) => (
+        <div
+          key={index}
+          className="group bg-gray-50 border border-gray-100 rounded-xl p-5
+                     hover:bg-white hover:shadow-md transition-all duration-300"
+        >
+          {/* Feedback */}
+          <p className="text-sm text-gray-700 leading-relaxed line-clamp-4">
+            “{item.feedback}”
           </p>
-        </div>
 
-        {/* Testimonial Cards */}
-        <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3">
-          {testimonials.map((item, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl shadow hover:shadow-lg transition p-6 flex flex-col"
-            >
-              {/* Quote Icon */}
-              <div className="text-blue-600 text-4xl mb-4">“</div>
-
-              {/* Feedback */}
-              <p className="text-gray-600 text-sm leading-relaxed flex-grow">
-                {item.feedback}
-              </p>
-
-              {/* Rating */}
-              <div className="mt-4 flex text-yellow-400">
-                {Array(item.rating)
-                  .fill()
-                  .map((_, i) => (
-                    <span key={i}>★</span>
-                  ))}
-              </div>
-              {/* Student Info */}
-              <div className="mt-6 flex items-center gap-3 border-t pt-4">
-                <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
-                  {item.name.charAt(0)}
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">
-                    {item.name}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {item.exam}
-                  </p>
-                </div>
+          {/* Footer */}
+          <div className="mt-5 flex items-center justify-between">
+            {/* Student Info */}
+            <div className="flex items-center gap-3">
+              <img
+                src={item.image}
+                alt={item.name}
+                className="w-10 h-10 rounded-full object-cover border border-gray-200"
+              />
+              <div>
+                <p className="text-sm font-semibold text-gray-900">
+                  {item.name}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {item.exam}
+                </p>
               </div>
             </div>
-          ))}
+
+            {/* Rating */}
+            <div className="flex text-yellow-400 text-sm">
+              {Array(item.rating)
+                .fill()
+                .map((_, i) => (
+                  <span key={i}>★</span>
+                ))}
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      ))}
+    </div>
+
+  </div>
+</section>
+
   );
 }
